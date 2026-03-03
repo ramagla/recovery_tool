@@ -1,0 +1,72 @@
+@"
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# =========================
+# Virtualenv
+# =========================
+venv/
+.venv/
+env/
+ENV/
+.python-version
+
+# =========================
+# Distribuição / build
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+pip-wheel-metadata/
+
+# =========================
+# PyInstaller
+# =========================
+*.spec
+
+# =========================
+# Logs / temporários
+# =========================
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# =========================
+# Cache / testes
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# IDEs / sistema
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Node (se tiver front)
+# =========================
+node_modules/
+
+# =========================
+# Arquivos recuperados / saída do sistema (ajuste se necessário)
+# =========================
+output/
+recovered/
+exports/
+"@ | Set-Content -Encoding UTF8 .gitignore

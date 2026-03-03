@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Status - {{ job_id }}</title>
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.10);
+      --text: #e5e7eb;
+      --muted: rgba(229,231,235,.70);
+      --accent: #60a5fa;
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(96,165,250,.25), transparent 60%),
+        radial-gradient(800px 500px at 90% 10%, rgba(34,197,94,.18), transparent 60%),
+        radial-gradient(900px 600px at 40% 110%, rgba(245,158,11,.16), transparent 60%),
+        var(--bg);
+    }
+
+    .wrap{ max-width: 980px; margin: 28px auto; padding: 0 16px 40px; }
+
+    .header{
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .title{
+      display:flex; flex-direction: column; gap: 8px;
+    }
+
+    .title h1{
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.45;
+      max-width: 720px;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12.5px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pill code{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.045));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel{ padding: 16px; }
+
+    .progressRow{
+      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+      margin: 10px 0 8px;
+    }
+
+    .badge{
+      display:inline-flex; align-items:center; gap: 8px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      user-select: none;
+    }
+    .dot{ width: 8px; height: 8px; border-radius: 999px; background: var(--muted); }
+
+    .badge.running .dot{ background: var(--accent); box-shadow: 0 0 0 6px rgba(96,165,250,.15); }
+    .badge.done .dot{ background: var(--good); box-shadow: 0 0 0 6px rgba(34,197,94,.12); }
+    .badge.error .dot{ background: var(--bad); box-shadow: 0 0 0 6px rgba(239,68,68,.12); }
+
+    .progress{
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .progress > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(96,165,250,.95), rgba(34,197,94,.85));
+      transition: width .35s ease;
+    }
+
+    .pct{
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: .2px;
+      color: var(--text);
+      min-width: 70px;
+      text-align: right;
+    }
+
+    .msg{
+      margin-top: 12px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .msg small{ display:block; color: var(--muted); margin-top: 6px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .header{ flex-direction: column; }
+      .pct{ text-align: left; }
+    }
+    @media (max-width: 520px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .kpi{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.055);
+    }
+    .kpi .label{ color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .kpi .value{ font-size: 18px; font-weight: 800; letter-spacing: .2px; }
+    .kpi .hint{ font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .meta{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 700px){
+      .meta{ grid-template-columns: 1fr; }
+    }
+
+    .metaItem{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.055);
+    }
+    .metaItem .label{ color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .metaItem .value{ font-size: 13px; color: var(--text); word-break: break-word; }
+
+    .linkish{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <h1>Status da Recuperação</h1>
+        <p class="subtitle">
+          Acompanhe o andamento em tempo real. Enquanto a varredura estiver em execução, mantenha esta aba aberta.
+          Se algo impedir a atualização (ex.: rota da API indisponível), você verá o diagnóstico aqui na tela.
+        </p>
+      </div>
+
+      <div class="pill">
+        Job <code>{{ job_id }}</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="panel">
+
+        <div class="progressRow">
+          <div id="badge" class="badge">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="stateLabel">Aguardando atualização…</span>
+          </div>
+          <div class="pct" id="pct">0%</div>
+        </div>
+
+        <div class="progress" aria-label="Progresso">
+          <div id="bar"></div>
+        </div>
+
+        <div class="msg" id="msg">
+          <b>Mensagem:</b> Preparando a leitura do status…
+          <small>
+            Dica: se o progresso não mudar, normalmente é porque a API retornou HTML (ex.: 404) em vez de JSON.
+            O motivo aparecerá automaticamente abaixo.
+          </small>
+        </div>
+
+        {% if job.error %}
+        <div class="card mt-3" style="border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06);">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge" style="background:rgba(220,53,69,.18); color:#ffb3b3; border:1px solid rgba(220,53,69,.35);">
+                Detalhes do erro
+              </span>
+              <small style="opacity:.8;">Copie o texto abaixo para diagnóstico</small>
+            </div>
+
+            <pre style="white-space:pre-wrap; word-break:break-word; margin:0; font-size:.9rem; line-height:1.25; color:#ffe3e3;">{{ job.error }}</pre>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="grid">
+          <div class="kpi">
+            <div class="label">Estado</div>
+            <div class="value" id="state">-</div>
+            <div class="hint">Situação atual do job</div>
+          </div>
+
+          <div class="kpi">
+            <div class="label">Processado</div>
+            <div class="value" id="proc">-</div>
+            <div class="hint">Bytes processados (quando aplicável)</div>
+          </div>
+
+          <div class="kpi">
+            <div class="label">Total</div>
+            <div class="value" id="total">-</div>
+            <div class="hint">Total estimado (quando aplicável)</div>
+          </div>
+
+          <div class="kpi">
+            <div class="label">Arquivos</div>
+            <div class="value" id="files">-</div>
+            <div class="hint">Quantidade encontrada/exportada</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="metaItem">
+            <div class="label">Saída</div>
+            <div class="value" id="outdir">-</div>
+          </div>
+
+          <div class="metaItem">
+            <div class="label">Relatórios</div>
+            <div class="value" id="reports">-</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setBadge(state){
+      const badge = document.getElementById("badge");
+      const stateLabel = document.getElementById("stateLabel");
+
+      badge.classList.remove("running", "done", "error");
+
+      if (state === "running"){
+        badge.classList.add("running");
+        stateLabel.innerText = "Em execução — varrendo e exportando…";
+        return;
+      }
+      if (state === "done"){
+        badge.classList.add("done");
+        stateLabel.innerText = "Concluído — recuperação finalizada.";
+        return;
+      }
+      if (state === "error"){
+        badge.classList.add("error");
+        stateLabel.innerText = "Falha — verifique a mensagem abaixo.";
+        return;
+      }
+      stateLabel.innerText = "Aguardando atualização…";
+    }
+
+    function formatBytes(n){
+      const num = Number(n);
+      if (!Number.isFinite(num) || num <= 0) return "-";
+      const units = ["B","KB","MB","GB","TB"];
+      let i = 0;
+      let v = num;
+      while (v >= 1024 && i < units.length - 1){
+        v = v / 1024;
+        i += 1;
+      }
+      return `${v.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
+    }
+
+    async function refresh(){
+      const jobId = "{{ job_id }}";
+
+      if (!jobId || jobId.trim() === ""){
+        document.getElementById("state").innerText = "error";
+        setBadge("error");
+        document.getElementById("msg").innerHTML =
+          "<b>Mensagem:</b> Job ID não foi renderizado no template. " +
+          "Corrija a rota /status/&lt;job_id&gt; para passar job_id ao render_template.";
+        return;
+      }
+
+      try{
+        const res = await fetch(`/api/status/${encodeURIComponent(jobId)}`, {
+          headers: { "Accept": "application/json" }
+        });
+
+        if (!res.ok){
+          const txt = await res.text();
+          throw new Error(`HTTP ${res.status}. Resposta: ${txt.substring(0, 180)}`);
+        }
+
+        const data = await res.json();
+
+        const state = data.state ?? "-";
+        document.getElementById("state").innerText = state;
+        setBadge(state);
+
+        document.getElementById("files").innerText = (data.found_files ?? "-");
+
+        const hasBytes = Number.isFinite(Number(data.processed_bytes)) || Number.isFinite(Number(data.total_bytes));
+        const processedBytes = Number(data.processed_bytes);
+        const totalBytes = Number(data.total_bytes);
+
+        document.getElementById("proc").innerText = hasBytes ? formatBytes(processedBytes) : "-";
+        document.getElementById("total").innerText = hasBytes ? formatBytes(totalBytes) : "-";
+
+        document.getElementById("msg").innerHTML = "<b>Mensagem:</b> " + (data.message || "-");
+        document.getElementById("outdir").innerText = data.output_dir || "-";
+
+        let pct = 0;
+
+        if (Number.isFinite(Number(data.progress_percent))){
+          pct = Number(data.progress_percent);
+        } else {
+          const totalFiles = Number(data.total_files);
+          const foundFiles = Number(data.found_files);
+          if (Number.isFinite(totalFiles) && totalFiles > 0 && Number.isFinite(foundFiles)){
+            pct = Math.floor((foundFiles * 100) / totalFiles);
+          }
+        }
+
+        if (!Number.isFinite(pct) || pct < 0) pct = 0;
+        if (pct > 100) pct = 100;
+
+        document.getElementById("pct").innerText = `${pct}%`;
+        document.getElementById("bar").style.width = `${pct}%`;
+
+        if (data.report_paths && (data.report_paths.csv || data.report_paths.json)) {
+          let txt = "";
+          if (data.report_paths.csv) txt += "CSV: " + data.report_paths.csv + " ";
+          if (data.report_paths.json) txt += "JSON: " + data.report_paths.json;
+
+          document.getElementById("reports").innerHTML = `<span class="linkish">${txt}</span>`;
+        } else {
+          document.getElementById("reports").innerText = "-";
+        }
+
+        if (state === "done" || state === "error") return;
+        setTimeout(refresh, 1000);
+
+      } catch (err){
+        document.getElementById("state").innerText = "error";
+        setBadge("error");
+
+        document.getElementById("msg").innerHTML =
+          "<b>Mensagem:</b> Não foi possível atualizar o status agora.<br>" +
+          "<span class='linkish'>" + (err?.message || err) + "</span><br><br>" +
+          "<small style='color: rgba(229,231,235,.70)'>" +
+          "Checklist rápido: (1) confirme que /api/status/&lt;job_id&gt; existe e retorna JSON, " +
+          "(2) verifique se job_id está sendo enviado ao template, " +
+          "(3) se houver Service Worker, desative/limpe cache para evitar que retorne index.html." +
+          "</small>";
+      }
+    }
+
+    refresh();
+  </script>
+</body>
+</html>
